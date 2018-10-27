@@ -1,0 +1,90 @@
+﻿@page
+@model IndexModel
+@{
+}
+
+
+
+<div class="col-sm-6">
+    <span class="text-danger" id="errorMessages"></span>
+    @foreach (var item in Model.Categories)
+    {
+        <div class="form-group has-feedback">
+            <form asp-page-handler="Edit" method="post" onsubmit="return onSubmit(this)">
+
+                <div class="input-group">
+                    <input type="hidden" asp-for="@item.CategoryId" name="CategoryModel.CategoryId" />
+                    <input type="text" asp-for="@item.CategoryName" name="CategoryModel.CategoryName" id="@item.CategoryId" asp-value="@item.CategoryName" class="form-control" readonly>
+
+                    <div class="input-group-btn jqManageLink">
+                        <a class="btn btn-primary" onclick="onEditForm('#@item.CategoryId')">
+                            <span class="glyphicon glyphicon-edit"></span>
+                        </a>
+                        <a asp-page-handler="Delete" asp-route-id="@item.CategoryId" class="btn btn-danger" onclick="return confirmDelete(this)">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </a>
+                    </div>
+
+                    <div class="input-group-btn hide jqActionForm">
+                        <button class="btn btn-primary">
+                            <span type="submit" class="glyphicon">@Strings.Save</span>
+                        </button>
+                        <a class="btn btn-default" onclick="onCancelForm('#@item.CategoryId')">
+                            <span type="submit" class="glyphicon">@Strings.Cancel</span>
+                        </a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    }
+
+
+
+    <br />
+    <form class="row" asp-page-handler="Add" method="post">
+        <div class="col-sm-9">
+            <input type="text" asp-for="@Model.CategoryModel.CategoryName" class="form-control" placeholder="Enter tag">
+            <span class="text-danger" asp-validation-for="@Model.CategoryModel.CategoryName"></span>
+        </div>
+        <button type="submit" id="submitTag" class="btn btn-primary col-sm-3">@Strings.AddNew</button>
+    </form>
+</div>
+<div class="clearfix" />
+
+@section Scripts {
+    <script>
+        function onCancelForm(elementId) {
+            // Set back to value before edit
+            $(elementId).val($(elementId).attr('asp-value'));
+            $(elementId).attr('readonly', true);
+            // clear error message if it occurs
+            $('#errorMessages').text('');
+
+
+            var $parentsUtil = $(elementId).parentsUntil('form');
+            $parentsUtil.children('.jqManageLink').removeClass('hide');
+            $parentsUtil.children('.jqActionForm').addClass('hide');
+        }
+
+        function onEditForm(elementId) {
+            $(elementId).removeAttr('readonly');
+
+            var $parentsUtil = $(elementId).parentsUntil('form');
+            $parentsUtil.children('.jqManageLink').addClass('hide');
+            $parentsUtil.children('.jqActionForm').removeClass('hide');
+        }
+
+        function onSubmit(e) {
+            $.post('/Admin/Categories?handler=Edit', $(e).serialize())
+                .done(function () {
+                    window.location.reload();
+                }).fail(function (xhr) {
+                    $('#errorMessages').text(xhr.responseText);
+                })
+
+            return false;
+        }
+    </script>
+
+}
