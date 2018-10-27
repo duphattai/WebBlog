@@ -2,7 +2,12 @@
 @model IndexModel
 @{
 }
-
+<style>
+    form[editmode="false"] .jqEditMode,
+    form[editmode="true"] .jqViewMode {
+        display: none !important;
+    }
+</style>
 
 
 <div class="col-sm-6">
@@ -10,13 +15,13 @@
     @foreach (var item in Model.Categories)
     {
         <div class="form-group has-feedback">
-            <form asp-page-handler="Edit" method="post" onsubmit="return onSubmit(this)">
+            <form asp-page-handler="Edit" method="post" editMode="false" onsubmit="return onSubmit(this)">
 
                 <div class="input-group">
                     <input type="hidden" asp-for="@item.CategoryId" name="CategoryModel.CategoryId" />
-                    <input type="text" asp-for="@item.CategoryName" name="CategoryModel.CategoryName" id="@item.CategoryId" asp-value="@item.CategoryName" class="form-control" readonly>
+                    <input type="text" asp-for="@item.CategoryName" name="CategoryModel.CategoryName" id="@item.CategoryId" asp-value="@item.CategoryName" class="form-control" readonly/>
 
-                    <div class="input-group-btn jqManageLink">
+                    <div class="input-group-btn jqViewMode">
                         <a class="btn btn-primary" onclick="onEditForm('#@item.CategoryId')">
                             <span class="glyphicon glyphicon-edit"></span>
                         </a>
@@ -25,7 +30,7 @@
                         </a>
                     </div>
 
-                    <div class="input-group-btn hide jqActionForm">
+                    <div class="input-group-btn jqEditMode">
                         <button class="btn btn-primary">
                             <span type="submit" class="glyphicon">@Strings.Save</span>
                         </button>
@@ -44,7 +49,7 @@
     <br />
     <form class="row" asp-page-handler="Add" method="post">
         <div class="col-sm-9">
-            <input type="text" asp-for="@Model.CategoryModel.CategoryName" class="form-control" placeholder="Enter tag">
+            <input type="text" asp-for="@Model.CategoryModel.CategoryName" class="form-control" placeholder="Enter category">
             <span class="text-danger" asp-validation-for="@Model.CategoryModel.CategoryName"></span>
         </div>
         <button type="submit" id="submitTag" class="btn btn-primary col-sm-3">@Strings.AddNew</button>
@@ -61,18 +66,12 @@
             // clear error message if it occurs
             $('#errorMessages').text('');
 
-
-            var $parentsUtil = $(elementId).parentsUntil('form');
-            $parentsUtil.children('.jqManageLink').removeClass('hide');
-            $parentsUtil.children('.jqActionForm').addClass('hide');
+            $(elementId).parents('form').attr('editMode', false)
         }
 
         function onEditForm(elementId) {
             $(elementId).removeAttr('readonly');
-
-            var $parentsUtil = $(elementId).parentsUntil('form');
-            $parentsUtil.children('.jqManageLink').addClass('hide');
-            $parentsUtil.children('.jqActionForm').removeClass('hide');
+            $(elementId).parents('form').attr('editMode', true)
         }
 
         function onSubmit(e) {

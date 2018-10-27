@@ -3,20 +3,25 @@
 @{
 }
 
-
+<style>
+    form[editmode="false"] .jqEditMode,
+    form[editmode="true"] .jqViewMode {
+        display: none !important;
+    }
+</style>
 <div class="col-sm-6">
     <span class="text-danger" id="errorMessages"></span>
 
     @foreach (var item in Model.Tags)
     {
         <div class="form-group has-feedback">
-            <form asp-page-handler="Edit" method="post" onsubmit="return onSubmit(this)">
+            <form asp-page-handler="Edit" method="post" editmode="false" onsubmit="return onSubmit(this)">
 
                 <div class="input-group">
                     <input type="hidden" asp-for="@item.TagId" name="TagModel.TagId" />
                     <input type="text" asp-for="@item.TagName" name="TagModel.TagName" id="@item.TagId" asp-value="@item.TagName" class="form-control" readonly>
 
-                    <div class="input-group-btn jqManageLink">
+                    <div class="input-group-btn jqViewMode">
                         <a class="btn btn-primary" onclick="onEditForm('#@item.TagId')">
                             <span class="glyphicon glyphicon-edit"></span>
                         </a>
@@ -25,7 +30,7 @@
                         </a>
                     </div>
 
-                    <div class="input-group-btn hide jqActionForm">
+                    <div class="input-group-btn jqEditMode">
                         <button class="btn btn-primary">
                             <span type="submit" class="glyphicon">@Strings.Save</span>
                         </button>
@@ -61,18 +66,12 @@
             // clear error message if it occurs
             $('#errorMessages').text('');
 
-
-            var $parentsUtil = $(elementId).parentsUntil('form');
-            $parentsUtil.children('.jqManageLink').removeClass('hide');
-            $parentsUtil.children('.jqActionForm').addClass('hide');
+            $(elementId).parents('form').attr('editMode', false)
         }
 
         function onEditForm(elementId) {
             $(elementId).removeAttr('readonly');
-
-            var $parentsUtil = $(elementId).parentsUntil('form');
-            $parentsUtil.children('.jqManageLink').addClass('hide');
-            $parentsUtil.children('.jqActionForm').removeClass('hide');
+            $(elementId).parents('form').attr('editMode', true)
         }
 
         function onSubmit(e) {
